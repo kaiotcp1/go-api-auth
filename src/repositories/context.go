@@ -34,3 +34,11 @@ func NewMongoRepositoryContext(uri, dbName, collectionName string) (*MongoReposi
 	}, nil
 
 }
+
+func (r *MongoRepositoryContext) Create(contextServer context.Context, document interface{}) error {
+	_, err := r.Collection.InsertOne(contextServer, document)
+	if err != nil {
+		return err
+	}
+	return nil
+}
