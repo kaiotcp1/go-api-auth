@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"context"
+	"fmt"
+	"go-api/src/utils"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,10 +22,13 @@ func NewMongoRepositoryContext(uri, dbName, collectionName string) (*MongoReposi
 	defer cancel()
 
 	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		return nil, utils.InternalServerError(fmt.Sprintf("Erro ao conectar ao banco de dados: %v", err))
+	}
 
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
-		return nil, err
+		return nil, utils.InternalServerError(fmt.Sprintf("Erro ao conectar ao banco de dados: %v", err))
 	}
 
 	collection := client.Database(dbName).Collection(collectionName)
@@ -38,7 +43,7 @@ func NewMongoRepositoryContext(uri, dbName, collectionName string) (*MongoReposi
 func (r *MongoRepositoryContext) Create(contextServer context.Context, document interface{}) error {
 	_, err := r.Collection.InsertOne(contextServer, document)
 	if err != nil {
-		return err
+		return utils.BadRequestError(fmt.Sprintf("Erro ao inserir documento: %v", err))
 	}
 	return nil
 }

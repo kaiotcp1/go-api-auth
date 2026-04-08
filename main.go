@@ -1,9 +1,10 @@
 package main
 
 import (
+	"go-api/src/controllers"
 	"go-api/src/repositories"
+	"go-api/src/utils/middleware"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -18,15 +19,20 @@ func main() {
 	uri := os.Getenv("MONGO_URI")
 	dbName := os.Getenv("MONGO_DB_NAME")
 	userCollection := os.Getenv("MONGO_USER_COLLECTION")
-	taskCollection := os.Getenv("MONGO_TASK_COLLECTION")
+	// taskCollection := os.Getenv("MONGO_TASK_COLLECTION")
 
 	repoUser, errUser := repositories.NewUserRepository(uri, dbName, userCollection)
-	repoTask, errTask := repositories.NewTaskRepository(uri, dbName, taskCollection)
-	app := gin.Default()
+	// repoTask, errTask := repositories.NewTaskRepository(uri, dbName, taskCollection)
 
-	app.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "Hello, Gin!"})
-	})
+	if errUser != nil {
+		log.Fatalf("Erro ao conectar ao banco de dados: %v", errUser)
+	}
 
-	app.Run(":8080")
+	server := gin.Default()
+	server.Use(middleware.ErrorMiddlewareHandler())
+
+	controllers.NewUserController(server, repoUser)
+	// controllers.NewTaskController(server, repoTask)
+
+	server.Run(":8080")
 }
