@@ -1,11 +1,59 @@
 basePath: /
+definitions:
+  dtos.APIError:
+    properties:
+      error:
+        type: string
+    type: object
+  dtos.Message:
+    properties:
+      message:
+        type: string
+    type: object
+  dtos.User:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
 host: 127.0.0.1:8080
 info:
   contact: {}
   description: API para gerenciamento de usuários e tarefas usando GIN e Mongodb
   title: API de Autenticação e Tarefas
   version: "1.0"
-paths: {}
+paths:
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Registra um novo usuário na API
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Usuário criado
+          schema:
+            $ref: '#/definitions/dtos.Message'
+        "400":
+          description: Erro de validação
+          schema:
+            $ref: '#/definitions/dtos.APIError'
+      summary: Criar um novo usuário
+      tags:
+      - users
 securityDefinitions:
   BearerAuth:
     description: 'Value: Bearer abc... (Bearer+space+token)'

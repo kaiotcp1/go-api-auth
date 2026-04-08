@@ -25,6 +25,15 @@ func NewUserController(server *gin.Engine, repository *repositories.UserReposito
 	}
 }
 
+// @Tags users
+// @Router /users [post]
+// @Summary Criar um novo usuário
+// @Description Registra um novo usuário na API
+// @Accept json
+// @Produce json
+// @Param user body dtos.User true "Dados do usuário"
+// @Success 201 {object} dtos.Message "Usuário criado"
+// @Failure 400 {object} dtos.APIError "Erro de validação
 func (controller *UserController) CreateUser(ginContext *gin.Context) {
 	var userDto dtos.User
 

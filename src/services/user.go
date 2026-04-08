@@ -4,6 +4,7 @@ import (
 	"go-api/src/dtos"
 	"go-api/src/repositories"
 	"go-api/src/utils"
+	"time"
 )
 
 type UserService struct {
@@ -18,6 +19,8 @@ func (service *UserService) CreateUser(email, password string) error {
 	user := dtos.User{
 		Email:    email,
 		Password: password,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	contextServer := utils.CreateContextServerWithTimeout()
