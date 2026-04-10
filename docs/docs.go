@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dtos.User"
+                            "$ref": "#/definitions/dtos.CreateUserRequest"
                         }
                     }
                 ],
@@ -48,6 +48,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Erro de validação",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.APIError"
+                        }
+                    },
+                    "409": {
+                        "description": "Usuário já cadastrado",
                         "schema": {
                             "$ref": "#/definitions/dtos.APIError"
                         }
@@ -65,15 +71,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dtos.Message": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "dtos.User": {
+        "dtos.CreateUserRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -86,6 +84,14 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "minLength": 6
+                }
+            }
+        },
+        "dtos.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         }

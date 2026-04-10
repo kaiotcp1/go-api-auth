@@ -1,16 +1,11 @@
 package repositories
 
+import "go.mongodb.org/mongo-driver/mongo"
+
 type TaskRepository struct {
-	*MongoRepositoryContext
+	collection *mongo.Collection
 }
 
-func NewTaskRepository(uri, dbName, collectionName string) (*TaskRepository, error) {
-	mongoRepo, err := NewMongoRepositoryContext(uri, dbName, collectionName)
-	if err != nil {
-		return nil, err
-	}
-
-	return &TaskRepository{
-		MongoRepositoryContext: mongoRepo,
-	}, nil
+func NewTaskRepository(collection *mongo.Collection) *TaskRepository {
+	return &TaskRepository{collection: collection}
 }

@@ -5,12 +5,7 @@ definitions:
       error:
         type: string
     type: object
-  dtos.Message:
-    properties:
-      message:
-        type: string
-    type: object
-  dtos.User:
+  dtos.CreateUserRequest:
     properties:
       email:
         type: string
@@ -20,6 +15,11 @@ definitions:
     required:
     - email
     - password
+    type: object
+  dtos.Message:
+    properties:
+      message:
+        type: string
     type: object
 host: 127.0.0.1:8080
 info:
@@ -39,7 +39,7 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/dtos.User'
+          $ref: '#/definitions/dtos.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -49,6 +49,10 @@ paths:
             $ref: '#/definitions/dtos.Message'
         "400":
           description: Erro de validação
+          schema:
+            $ref: '#/definitions/dtos.APIError'
+        "409":
+          description: Usuário já cadastrado
           schema:
             $ref: '#/definitions/dtos.APIError'
       summary: Criar um novo usuário
