@@ -51,3 +51,22 @@ func (c *UserController) CreateUser(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusCreated, dtos.Message{Message: "Usuário criado com sucesso."})
 }
+
+func (c *UserController) LoginUser(ginCtx *gin.Context) {
+	var req dtos.LoginUserRequest
+	err := utils.ValidateRequestBody(ginCtx, &req)
+	if err != nil {
+		ginCtx.Error(err)
+	}
+
+	ctx, cancel := context.WithTimeout(ginCtx.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	token, err := c.service.LoginUser(ctx, req.Email, req.Password)
+	if err != nil {
+		ginCtx.Error(err)
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, dtos.LoginUserResponse{Token: token, Success: true})
+}
