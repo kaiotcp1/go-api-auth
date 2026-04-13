@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go-api/src/entities"
 	"go-api/src/utils"
-	"go-api/src/utils/middleware"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,10 +21,11 @@ type userRepository interface {
 // Struct UserService implementa a interface UserRepository
 type UserService struct {
 	repository userRepository
+	jwtService JWTService
 }
 
-func NewUserService(repository userRepository) *UserService {
-	return &UserService{repository: repository}
+func NewUserService(repository userRepository, jwtService JWTService) *UserService {
+	return &UserService{repository: repository, jwtService: jwtService}
 }
 
 func (service *UserService) RegisterUser(ctx context.Context, email, password string) error {
@@ -54,10 +54,13 @@ func (service *UserService) RegisterUser(ctx context.Context, email, password st
 }
 
 func (service *UserService) LoginUser(ctx context.Context, email, password string) (string, error) {
-
 	user, err := service.repository.FindByEmail(ctx, email)
 	if err != nil {
 		return "", err
+	}
+
+	if user == nil {
+		return "", utils.BadRequestError("email ou senha incorretos")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
@@ -66,6 +69,11 @@ func (service *UserService) LoginUser(ctx context.Context, email, password strin
 		return "", utils.BadRequestError("email ou senha incorretos")
 	}
 
-	return middleware.GenerateToken(user.Email, user.ID)
+	token, err := service.jwtService.GenerateToken(user.ID.Hex())
+	if err != nil {
+		return "", utils.InternalServerError("erro ao gerar token")
+	}
+
+	return token, nil
 
 }

@@ -21,6 +21,7 @@ func NewUserController(server *gin.Engine, service *services.UserService) {
 	routes := server.Group("/users")
 	{
 		routes.POST("", controller.CreateUser)
+		routes.POST("/login", controller.LoginUser)
 	}
 }
 
@@ -68,5 +69,5 @@ func (c *UserController) LoginUser(ginCtx *gin.Context) {
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, dtos.LoginUserResponse{Token: token, Success: true})
+	ginCtx.JSON(http.StatusOK, dtos.LoginUserResponse{Success: true, Token: token})
 }
