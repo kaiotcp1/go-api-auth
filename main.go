@@ -24,7 +24,7 @@ import (
 // @version 1.1.0
 // @description Portfolio-ready authentication API built with Gin, MongoDB and JWT.
 // @contact.name Kaio
-// @contact.url https://github.com/
+// @contact.url https://github.com/kaiotcp1
 // @license.name MIT
 // @host 127.0.0.1:8080
 // @BasePath /

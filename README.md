@@ -118,6 +118,23 @@ Arquivos adicionados para isso:
 - `healthcheck` no container do banco
 - integracao com `Makefile` para simplificar a execucao
 
+## Imagens
+
+### Swagger
+
+![Tela inicial do Swagger](docs/images/swagger_image_1.png)
+
+### Endpoint de login
+
+![Documentacao da rota de login no Swagger](docs/images/swagger_image_2.png)
+
+![Persistência de dados no MongoDb](docs/images/mongodb_1.png)
+
+
+### Containers em execucao
+
+![Containers da aplicacao e do MongoDB em execucao](docs/images/docker_image_running.png)
+
 ## Swagger
 
 Abra no navegador:
