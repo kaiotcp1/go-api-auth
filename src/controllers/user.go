@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"go-api/src/dtos"
 	"go-api/src/services"
 	"go-api/src/utils"
-	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,7 @@ type UserController struct {
 	service *services.UserService
 }
 
-func NewUserController(server *gin.Engine, service *services.UserService) {
+func NewUserController(server gin.IRouter, service *services.UserService) {
 	controller := &UserController{service: service}
 
 	routes := server.Group("/users")
@@ -26,15 +27,16 @@ func NewUserController(server *gin.Engine, service *services.UserService) {
 }
 
 // @Tags users
-// @Router /users [post]
-// @Summary Criar um novo usuário
-// @Description Registra um novo usuário na API
+// @Router /api/v1/users [post]
+// @Summary Create a new user
+// @Description Registers a new user account in the API.
 // @Accept json
 // @Produce json
-// @Param user body dtos.CreateUserRequest true "Dados do usuário"
-// @Success 201 {object} dtos.Message "Usuário criado"
-// @Failure 400 {object} dtos.APIError "Erro de validação"
-// @Failure 409 {object} dtos.APIError "Usuário já cadastrado"
+// @Param user body dtos.CreateUserRequest true "User payload"
+// @Success 201 {object} dtos.Message "User created successfully"
+// @Failure 400 {object} dtos.APIError "Validation error"
+// @Failure 409 {object} dtos.APIError "User already exists"
+// @Failure 500 {object} dtos.APIError "Internal server error"
 func (c *UserController) CreateUser(ginCtx *gin.Context) {
 	var req dtos.CreateUserRequest
 	if err := utils.ValidateRequestBody(ginCtx, &req); err != nil {
@@ -50,14 +52,24 @@ func (c *UserController) CreateUser(ginCtx *gin.Context) {
 		return
 	}
 
-	ginCtx.JSON(http.StatusCreated, dtos.Message{Message: "Usuário criado com sucesso."})
+	ginCtx.JSON(http.StatusCreated, dtos.Message{Message: "Usuario criado com sucesso."})
 }
 
+// @Tags auth
+// @Router /api/v1/users/login [post]
+// @Summary Login
+// @Description Validates credentials and returns a JWT token.
+// @Accept json
+// @Produce json
+// @Param credentials body dtos.LoginUserRequest true "Login payload"
+// @Success 200 {object} dtos.LoginUserResponse "Authenticated successfully"
+// @Failure 400 {object} dtos.APIError "Invalid credentials or request body"
+// @Failure 500 {object} dtos.APIError "Internal server error"
 func (c *UserController) LoginUser(ginCtx *gin.Context) {
 	var req dtos.LoginUserRequest
-	err := utils.ValidateRequestBody(ginCtx, &req)
-	if err != nil {
+	if err := utils.ValidateRequestBody(ginCtx, &req); err != nil {
 		ginCtx.Error(err)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(ginCtx.Request.Context(), 5*time.Second)

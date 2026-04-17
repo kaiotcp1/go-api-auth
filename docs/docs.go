@@ -9,15 +9,55 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "Kaio",
+            "url": "https://github.com/"
+        },
+        "license": {
+            "name": "MIT"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/users": {
+        "/": {
+            "get": {
+                "description": "Returns metadata about the API and the most important endpoints.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "API overview",
+                "responses": {
+                    "200": {
+                        "description": "API metadata",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.APIInfoResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "description": "Checks whether the API is up and returns its current version.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users": {
             "post": {
-                "description": "Registra um novo usuário na API",
+                "description": "Registers a new user account in the API.",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,10 +67,10 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Criar um novo usuário",
+                "summary": "Create a new user",
                 "parameters": [
                     {
-                        "description": "Dados do usuário",
+                        "description": "User payload",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -41,19 +81,71 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Usuário criado",
+                        "description": "User created successfully",
                         "schema": {
                             "$ref": "#/definitions/dtos.Message"
                         }
                     },
                     "400": {
-                        "description": "Erro de validação",
+                        "description": "Validation error",
                         "schema": {
                             "$ref": "#/definitions/dtos.APIError"
                         }
                     },
                     "409": {
-                        "description": "Usuário já cadastrado",
+                        "description": "User already exists",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.APIError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/login": {
+            "post": {
+                "description": "Validates credentials and returns a JWT token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Login payload",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LoginUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Authenticated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.LoginUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid credentials or request body",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.APIError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/dtos.APIError"
                         }
@@ -71,6 +163,33 @@ const docTemplate = `{
                 }
             }
         },
+        "dtos.APIInfoResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "JWT authentication API built with Gin and MongoDB."
+                },
+                "docsUrl": {
+                    "type": "string",
+                    "example": "/swagger/index.html"
+                },
+                "endpoints": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Go Auth API"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "1.1.0"
+                }
+            }
+        },
         "dtos.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -79,11 +198,64 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "junior.dev@email.com"
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 6
+                    "minLength": 6,
+                    "example": "123456"
+                }
+            }
+        },
+        "dtos.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "service": {
+                    "type": "string",
+                    "example": "Go Auth API"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2026-04-17T14:00:00Z"
+                },
+                "version": {
+                    "type": "string",
+                    "example": "1.1.0"
+                }
+            }
+        },
+        "dtos.LoginUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "junior.dev@email.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "123456"
+                }
+            }
+        },
+        "dtos.LoginUserResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                 }
             }
         },
@@ -98,7 +270,7 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "BearerAuth": {
-            "description": "Value: Bearer abc... (Bearer+space+token)",
+            "description": "Use the format: Bearer <token>",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"
@@ -108,12 +280,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "1.1.0",
 	Host:             "127.0.0.1:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "API de Autenticação e Tarefas",
-	Description:      "API para gerenciamento de usuários e tarefas usando GIN e Mongodb",
+	Title:            "Go Auth API",
+	Description:      "Portfolio-ready authentication API built with Gin, MongoDB and JWT.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

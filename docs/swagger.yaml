@@ -5,16 +5,73 @@ definitions:
       error:
         type: string
     type: object
+  dtos.APIInfoResponse:
+    properties:
+      description:
+        example: JWT authentication API built with Gin and MongoDB.
+        type: string
+      docsUrl:
+        example: /swagger/index.html
+        type: string
+      endpoints:
+        items:
+          type: string
+        type: array
+      name:
+        example: Go Auth API
+        type: string
+      version:
+        example: 1.1.0
+        type: string
+    type: object
   dtos.CreateUserRequest:
     properties:
       email:
+        example: junior.dev@email.com
         type: string
       password:
+        example: "123456"
         minLength: 6
         type: string
     required:
     - email
     - password
+    type: object
+  dtos.HealthResponse:
+    properties:
+      service:
+        example: Go Auth API
+        type: string
+      status:
+        example: ok
+        type: string
+      timestamp:
+        example: "2026-04-17T14:00:00Z"
+        type: string
+      version:
+        example: 1.1.0
+        type: string
+    type: object
+  dtos.LoginUserRequest:
+    properties:
+      email:
+        example: junior.dev@email.com
+        type: string
+      password:
+        example: "123456"
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dtos.LoginUserResponse:
+    properties:
+      success:
+        example: true
+        type: boolean
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
     type: object
   dtos.Message:
     properties:
@@ -23,18 +80,33 @@ definitions:
     type: object
 host: 127.0.0.1:8080
 info:
-  contact: {}
-  description: API para gerenciamento de usuários e tarefas usando GIN e Mongodb
-  title: API de Autenticação e Tarefas
-  version: "1.0"
+  contact:
+    name: Kaio
+    url: https://github.com/
+  description: Portfolio-ready authentication API built with Gin, MongoDB and JWT.
+  license:
+    name: MIT
+  title: Go Auth API
+  version: 1.1.0
 paths:
-  /users:
+  /:
+    get:
+      description: Returns metadata about the API and the most important endpoints.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API metadata
+          schema:
+            $ref: '#/definitions/dtos.APIInfoResponse'
+      summary: API overview
+  /api/v1/users:
     post:
       consumes:
       - application/json
-      description: Registra um novo usuário na API
+      description: Registers a new user account in the API.
       parameters:
-      - description: Dados do usuário
+      - description: User payload
         in: body
         name: user
         required: true
@@ -44,23 +116,68 @@ paths:
       - application/json
       responses:
         "201":
-          description: Usuário criado
+          description: User created successfully
           schema:
             $ref: '#/definitions/dtos.Message'
         "400":
-          description: Erro de validação
+          description: Validation error
           schema:
             $ref: '#/definitions/dtos.APIError'
         "409":
-          description: Usuário já cadastrado
+          description: User already exists
           schema:
             $ref: '#/definitions/dtos.APIError'
-      summary: Criar um novo usuário
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dtos.APIError'
+      summary: Create a new user
       tags:
       - users
+  /api/v1/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Validates credentials and returns a JWT token.
+      parameters:
+      - description: Login payload
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authenticated successfully
+          schema:
+            $ref: '#/definitions/dtos.LoginUserResponse'
+        "400":
+          description: Invalid credentials or request body
+          schema:
+            $ref: '#/definitions/dtos.APIError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dtos.APIError'
+      summary: Login
+      tags:
+      - auth
+  /health:
+    get:
+      description: Checks whether the API is up and returns its current version.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            $ref: '#/definitions/dtos.HealthResponse'
+      summary: Health check
 securityDefinitions:
   BearerAuth:
-    description: 'Value: Bearer abc... (Bearer+space+token)'
+    description: Use the format: Bearer <token>
     in: header
     name: Authorization
     type: apiKey
